@@ -1,11 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const port = process.env.PORT ?? 3000;
+
+  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('World Snap')

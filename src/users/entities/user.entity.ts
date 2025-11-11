@@ -6,7 +6,4 @@ export class User {
 
   @ApiProperty()
   email: string;
-
-  @ApiProperty()
-  password: string;
 }

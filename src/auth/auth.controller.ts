@@ -6,6 +6,8 @@ import {
   Param,
   Delete,
   UsePipes,
+  ValidationPipe,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from 'src/users/entities/user.entity';
@@ -14,20 +16,37 @@ import {
   createUserSchema,
   type CreateUserDto,
 } from 'src/users/dto/create-user.dto';
+import { type SignInDto, signInSchema } from './dto/sigin-auth.dto';
+import type { Response } from 'express';
+import { Public } from 'src/common/decorators/public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('register')
   @UsePipes(new ZodValidationPipe(createUserSchema))
+  async register(@Body() createUserDto: CreateUserDto): Promise<User> {
+    const user = await this.authService.register(createUserDto);
+
+    return user;
+  }
+
+  @Post('signin')
+  @UsePipes(new ZodValidationPipe(signInSchema))
   async signIn(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<Omit<User, 'password'>> {
-    const createdUser = await this.authService.register(createUserDto);
+    @Body() signInDto: SignInDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<string> {
+    const access_token = await this.authService.signIn(signInDto);
 
-    const { password, ...result } = createdUser;
+    response.cookie('world_snap_user', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 day
+    });
 
-    return result;
+    return 'Successfully logged in';
   }
 }

@@ -19,11 +19,15 @@ import {
 import { type SignInDto, signInSchema } from './dto/sigin-auth.dto';
 import type { Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ConfigService } from '@nestjs/config';
 
 @Public()
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('register')
   @UsePipes(new ZodValidationPipe(createUserSchema))
@@ -43,7 +47,7 @@ export class AuthController {
 
     response.cookie('world_snap_user', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 day
     });
 

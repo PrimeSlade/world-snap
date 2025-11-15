@@ -1,12 +1,13 @@
 import { Controller, Post, Body, UsePipes, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
-import { createUserSchema } from 'src/users/dto/create-user.dto';
+import { createUserSchema } from 'src/users/dto/user.dto';
 import type { Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { ConfigService } from '@nestjs/config';
 import { RegisterDto, SignInDto, signInSchema } from './dto/auth.dto';
 import { User } from 'src/users/entities/user.entity';
+import { ResponseType } from 'src/common/types/responce.type';
 
 @Public()
 @Controller('auth')
@@ -20,7 +21,7 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(createUserSchema))
   async register(
     @Body() registerDto: RegisterDto,
-  ): Promise<{ data: User; message: string }> {
+  ): Promise<ResponseType<User>> {
     const user = await this.authService.register(registerDto);
 
     return {

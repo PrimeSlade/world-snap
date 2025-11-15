@@ -5,14 +5,8 @@ import { createUserSchema } from 'src/users/dto/create-user.dto';
 import type { Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { ConfigService } from '@nestjs/config';
-import { ApiBody, ApiHeader, ApiOperation } from '@nestjs/swagger';
 import { RegisterDto, SignInDto, signInSchema } from './dto/auth.dto';
-import {
-  ApiErrorResponse,
-  ApiSuccessResponse,
-} from 'src/common/decorators/response.decorator';
-import { User } from '../users/entities/user.entity';
-import { RegisterAuth, SignInAuth } from './entities/auth.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Public()
 @Controller('auth')
@@ -24,13 +18,6 @@ export class AuthController {
 
   @Post('register')
   @UsePipes(new ZodValidationPipe(createUserSchema))
-  @ApiBody({ type: RegisterAuth })
-  @ApiOperation({ summary: 'Create new user' })
-  @ApiSuccessResponse(User, 'User created successfully')
-  @ApiErrorResponse([
-    { statusCode: 401, description: 'Unauthorized' },
-    { statusCode: 500, description: 'Internal Server Error' },
-  ])
   async register(
     @Body() registerDto: RegisterDto,
   ): Promise<{ data: User; message: string }> {
@@ -44,13 +31,6 @@ export class AuthController {
 
   @Post('signin')
   @UsePipes(new ZodValidationPipe(signInSchema))
-  @ApiBody({ type: SignInAuth })
-  @ApiOperation({ summary: 'Sign In new user' })
-  @ApiSuccessResponse(User, 'Successfully logged in')
-  @ApiErrorResponse([
-    { statusCode: 401, description: 'Password is incorrect' },
-    { statusCode: 500, description: 'Internal Server Error' },
-  ])
   async signIn(
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,

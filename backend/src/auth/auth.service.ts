@@ -3,7 +3,7 @@ import { comparePassword, hashPassword } from 'src/common/helpers/hahs.helper';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto, SignInDto } from './dto/auth.dto';
-import { User } from '../users/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {

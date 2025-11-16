@@ -20,23 +20,19 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async findOne(
-    @UserDecorator() user: { userId: number },
-  ): Promise<ResponseType<User>> {
-    const result = await this.usersService.findOne(user.userId);
-
-    return { data: result, message: 'User fetched successfully' };
+  findOne(@UserDecorator() user: User): ResponseType<User> {
+    return { data: user, message: 'User fetched successfully' };
   }
 
   @Patch()
   async updateCategories(
-    @UserDecorator() user: { userId: number },
+    @UserDecorator() user: User,
     @Body(new ZodValidationPipe(updateCategoriesSchema))
     updateCategoriesDto: UpdateCategoriesDto,
   ): Promise<ResponseType<User>> {
     console.log(updateCategoriesDto);
     const result = await this.usersService.updateCategories(
-      user.userId,
+      user.id,
       updateCategoriesDto,
     );
 
@@ -45,9 +41,9 @@ export class UsersController {
 
   @Patch('me')
   async softDeleteUSer(
-    @UserDecorator() user: { userId: number },
+    @UserDecorator() user: User,
   ): Promise<ResponseType<null>> {
-    await this.usersService.softDeleteUser(user.userId);
+    await this.usersService.softDeleteUser(user.id);
 
     return { message: 'User deleted successfully' };
   }

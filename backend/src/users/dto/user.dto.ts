@@ -15,7 +15,8 @@ export const updateCategoriesSchema = z.object({
     .max(5, 'Maximum 5 categories allowed')
     .refine((arr) => new Set(arr).size === arr.length, {
       message: 'Duplicate categories are not allowed',
-    }),
+    })
+    .optional(),
 });
 
 export type CreateUserDto = z.infer<typeof createUserSchema>;

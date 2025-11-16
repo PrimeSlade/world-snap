@@ -39,7 +39,7 @@ export class UsersService {
     return result;
   }
 
-  async softDeleteUser(id: number) {
+  async softDeleteUser(id: number): Promise<undefined> {
     await this.prismaService.user.update({
       where: {
         id,

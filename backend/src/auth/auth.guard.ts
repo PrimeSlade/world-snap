@@ -2,14 +2,17 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
+import { Prisma } from 'generated/prisma/client';
+import { NotFoundError, Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,6 +20,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private reflector: Reflector,
     private configService: ConfigService,
+    private readonly userService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -49,9 +53,18 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET_KEY'),
       });
 
-      request['user'] = payload;
+      //fetch user
+      const user = await this.userService.findOne(payload.userId);
+
+      request['user'] = user;
     } catch (error) {
       console.log(error);
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
+      }
       throw new UnauthorizedException('Invalid token');
     }
 

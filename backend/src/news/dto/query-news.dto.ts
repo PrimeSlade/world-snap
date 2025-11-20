@@ -2,7 +2,7 @@ import { Category } from 'generated/prisma/enums';
 import z from 'zod';
 
 export const fetchByCursorSchema = z.object({
-  cursor: z.coerce.number().optional(),
+  cursor: z.string().nullable().optional(),
   take: z.coerce.number().default(10),
   categories: z
     .array(z.enum(Category))

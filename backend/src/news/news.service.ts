@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { FetchByCursorDto } from './dto/query-news.dto';
 import { PrismaService } from 'src/prisma.service';
 import { News } from './entities/news.entity';
-import { User } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { InsertNewsDto } from './dto/insert-news.dto';
+import { buildNewsApiUrl } from './news.constants';
 
 @Injectable()
 export class NewsService {
@@ -48,7 +48,7 @@ export class NewsService {
     const news = await this.prismaService.new.findMany({
       take: take + 1,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
+      cursor: cursor ? { id: Number(cursor) } : undefined,
       orderBy: { id: 'desc' },
       ...(categories?.length && {
         where: { category: { hasSome: categories } },
@@ -67,22 +67,12 @@ export class NewsService {
     return { data, nextCursor, hasNextPage };
   }
 
-  async fetchNews(user: User) {
-    const categories = user.categories
-      .map((category) => category.toLowerCase())
-      .join(',');
-
+  async fetchNews() {
     const apikey = this.configService.get<string>('NEWSDATA_API');
 
-    const news = await fetch(
-      `https://newsdata.io/api/1/latest?apikey=${apikey}` +
-        `&language=en` +
-        `&image=1` +
-        `&removeduplicate=1` +
-        `&sort=pubdateasc` +
-        `&size=10` +
-        (categories ? `&category=${categories}` : ''),
-    );
+    const url = buildNewsApiUrl(apikey!);
+
+    const news = await fetch(url);
 
     return news.json();
   }

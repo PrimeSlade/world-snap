@@ -7,19 +7,33 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { FetchByCursorDto, fetchByCursorSchema } from './dto/query-news.dto';
 import { User as UserDecorator } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { NewsProcessor } from './news.processor';
+import { SummerizeNewDto } from './dto/summerize-news.dto';
 
 @Controller('news')
 export class NewsController {
-  constructor(private readonly newsService: NewsService) {}
+  constructor(
+    private readonly newsService: NewsService,
+    private readonly newsProcessor: NewsProcessor,
+  ) {}
 
-  @Post()
-  createNews() {}
+  @Post(':id/summarize')
+  async summarizeNew(
+    @Body() summerizeNewDto: SummerizeNewDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const summerizedVersion =
+      await this.newsProcessor.summarize(summerizeNewDto);
+
+    console.log(summerizedVersion);
+  }
 
   @Get()
   async getNews(
@@ -38,14 +52,6 @@ export class NewsController {
       });
 
     news = data;
-
-    if (data.length === 0 || nextCursor === null) {
-      const fetchedNews = await this.newsService.fetchNews(user);
-
-      console.log(fetchedNews.results);
-
-      news = await this.newsService.insertNews(fetchedNews.results);
-    }
 
     return {
       data: news,

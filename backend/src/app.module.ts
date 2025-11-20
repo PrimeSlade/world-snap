@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma.module';
 import { NewsModule } from './news/news.module';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { NewsModule } from './news/news.module';
     UsersModule,
     PrismaModule,
     NewsModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],

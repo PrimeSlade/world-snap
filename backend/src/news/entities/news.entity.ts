@@ -11,7 +11,7 @@ export class News {
   sourceUrl: string;
   creator: string[];
   imageUrl: string | null;
-  description: string;
+  description: string | null;
   category: Category[];
   pubDate: Date;
   pubDateTZ: string;
